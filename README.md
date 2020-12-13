@@ -1,4 +1,6 @@
 "# light-ply" 
+
+# support hls , mp4 
 npm run build
 
 npm start
