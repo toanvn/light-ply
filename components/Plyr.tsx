@@ -37,12 +37,9 @@ export const Plyr = React.forwardRef<HTMLPlyrVideoElement, PlyrProps>(
       maxMaxBufferLength: 30,
       maxBufferSize: 6 * 1000 * 1000
     }
+
     useEffect(() => {
       if (!innerRef.current) return
-
-      if (!innerRef.current?.plyr) {
-        innerRef.current.plyr = new PlyrJS('.plyr-react',  {...options , "iconUrl":"../images/plyr.svg"})
-      }
 
       if (typeof ref === 'function') {
         if (innerRef.current) ref(innerRef.current)
@@ -52,17 +49,54 @@ export const Plyr = React.forwardRef<HTMLPlyrVideoElement, PlyrProps>(
 
       if (innerRef.current) {
         if (!Hls.isSupported() && source) {
+          if (!innerRef.current?.plyr) {
+            innerRef.current.plyr = new PlyrJS(innerRef.current ,  {...options , "iconUrl":"../images/plyr.svg"})
+          }
           innerRef.current.plyr.source = source
         } else if (hlsData && hlsData.url) {
           const hls = new Hls(hlsCfg);
           hls.loadSource(hlsData.url);
+
+          hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+            // Transform available levels into an array of integers (height values).
+            const availableQualities = data.levels.map((l) => l.height)
+      
+            // Add new qualities to option
+            let first = true;
+            const quality  = {
+              default: availableQualities[0],
+              options: availableQualities,
+              // this ensures Plyr to use Hls to update quality level
+              forced: true,        
+              onChange: (e) => {
+                first = false;
+                if(!first) {
+                  hls.nextLoadLevel = data.levels.findIndex( l => l.height === e)
+                }
+              },
+            }
+
+            if (!innerRef.current?.plyr) {
+              const cfgOptions = {...options, "quality": quality , "iconUrl":"../images/plyr.svg"}
+              innerRef.current.plyr = new PlyrJS(innerRef.current , cfgOptions )
+              let count = 0;
+              innerRef.current.plyr.on('timeupdate', () => {
+                if(count === 10) {
+                  innerRef.current.plyr.quality = data.levels[hls.loadLevel].height
+                  count = 0
+                }
+                count++
+              })
+              if(!hlsData.preload) {
+                innerRef.current.plyr.once('play', () => {
+                  hls.startLoad();
+                })
+              }
+            }
+          });
+
           hls.attachMedia(innerRef.current);
           // window.hls = hls;
-          if(!hlsData.preload) {
-            innerRef.current.plyr.once('play', () => {
-              hls.startLoad();
-            })
-          }
         }
       }
     }, [ref, options, source])
@@ -82,9 +116,10 @@ Plyr.displayName = 'Plyr'
 Plyr.defaultProps = {
   options: {
     controls: [
-      'rewind',
+      'play-large',
+      //'rewind',
       'play',
-      'fast-forward',
+      //'fast-forward',
       'progress',
       'current-time',
       'duration',
@@ -93,6 +128,7 @@ Plyr.defaultProps = {
       'settings',
       'fullscreen',
     ],
+    //settings: ['captions', 'quality', 'speed', 'loop'],
     i18n: {
       restart: 'Restart',
       rewind: 'Rewind {seektime}s',
