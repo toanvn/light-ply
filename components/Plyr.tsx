@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react'
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 import PlyrJS, { Options, SourceInfo, PlyrEvent as PlyrJSEvent } from 'plyr'
 import Hls from 'hls.js'
 
@@ -178,9 +178,9 @@ Plyr.defaultProps = {
   },
 }
 
-Plyr.propTypes = {
-  options: PropTypes.object,
-  source: PropTypes.any,
-}
+// Plyr.propTypes = {
+//   options: PropTypes.object,
+//   source: PropTypes.any,
+// }
 
 export default Plyr
