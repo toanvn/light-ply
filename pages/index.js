@@ -5,10 +5,6 @@ import Router from "next/router"
 // 1
 // 2
 // 3
-// 4
-// 5
-// 6
-// 7
 function HomePage(props) {
     return <Container>
         <Head>
