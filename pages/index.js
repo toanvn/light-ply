@@ -4,6 +4,7 @@ import Container from "../components/container"
 import Router from "next/router"
 // 1
 // 2
+// 3
 function HomePage(props) {
     return <Container>
         <Head>
