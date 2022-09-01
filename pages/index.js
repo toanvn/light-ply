@@ -2,7 +2,7 @@ import Link from "next/link"
 import Head from "next/head"
 import Container from "../components/container"
 import Router from "next/router"
-
+// 1
 function HomePage(props) {
     return <Container>
         <Head>
